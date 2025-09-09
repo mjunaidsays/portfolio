@@ -423,7 +423,7 @@ function App() {
             </div>
 
             <p className="text-lg text-gray-300 leading-relaxed max-w-2xl">
-              Passionate 24-year-old engineer specializing in AI/ML solutions, full-stack development,
+              Passionate software engineer specializing in AI/ML solutions, full-stack development,
               and cutting-edge technologies. Building intelligent applications that solve real-world problems.
             </p>
 
