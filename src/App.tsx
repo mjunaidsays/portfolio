@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import emailjs from '@emailjs/browser';
 import { emailjsConfig } from './config';
 import { 
@@ -16,14 +16,89 @@ import {
   Sun,
   Moon,
   ExternalLink,
-  Play,
-  Star,
   Award,
   Users,
   Zap,
   CloudSun,
   Languages
 } from 'lucide-react';
+
+// Custom Hook for Scroll Animations
+const useScrollAnimation = (threshold = 0.1) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => {
+      if (ref.current) {
+        observer.unobserve(ref.current);
+      }
+    };
+  }, [threshold]);
+
+  return [ref, isVisible] as const;
+};
+
+// Scroll Reveal Component
+const ScrollReveal = ({ 
+  children, 
+  animation = 'fadeInUp', 
+  delay = 0,
+  duration = 600 
+}: { 
+  children: React.ReactNode;
+  animation?: 'fadeInUp' | 'fadeInLeft' | 'fadeInRight' | 'fadeIn' | 'scaleIn';
+  delay?: number;
+  duration?: number;
+}) => {
+  const [ref, isVisible] = useScrollAnimation(0.1);
+
+  const getAnimationClasses = () => {
+    const baseClasses = `transition-all duration-${duration} ease-out`;
+    
+    if (!isVisible) {
+      switch (animation) {
+        case 'fadeInUp':
+          return `${baseClasses} opacity-0 translate-y-8`;
+        case 'fadeInLeft':
+          return `${baseClasses} opacity-0 -translate-x-8`;
+        case 'fadeInRight':
+          return `${baseClasses} opacity-0 translate-x-8`;
+        case 'fadeIn':
+          return `${baseClasses} opacity-0`;
+        case 'scaleIn':
+          return `${baseClasses} opacity-0 scale-95`;
+        default:
+          return `${baseClasses} opacity-0 translate-y-8`;
+      }
+    }
+    
+    return `${baseClasses} opacity-100 translate-y-0 translate-x-0 scale-100`;
+  };
+
+  return (
+    <div
+      ref={ref}
+      className={getAnimationClasses()}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+};
 
 // Particle Component
 const ParticleField = () => {
@@ -461,47 +536,60 @@ function App() {
       {/* About Section */}
       <section id="about" className="py-20" style={{ backgroundColor: '#1e293b' }}>
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold mb-4" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              About Me
-            </h2>
-            <p className="text-xl text-gray-300">Passionate about creating intelligent solutions</p>
-          </div>
+          <ScrollReveal animation="fadeInUp" delay={0}>
+            <div className="text-center mb-16">
+              <h2 className="text-5xl font-bold mb-4" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                About Me
+              </h2>
+              <p className="text-xl text-gray-300">Passionate about creating intelligent solutions</p>
+            </div>
+          </ScrollReveal>
 
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <p className="text-xl text-gray-300 leading-relaxed">
-                I'm a dedicated Full Stack AI Engineer with a passion for developing innovative solutions
-                using cutting-edge technologies. My expertise spans across machine learning, natural language
-                processing, and full-stack web development.
-              </p>
+            <ScrollReveal animation="fadeInLeft" delay={200} duration={800}>
+              <div className="space-y-8">
+                <p className="text-xl text-gray-300 leading-relaxed">
+                  I'm a dedicated Full Stack AI Engineer with a passion for developing innovative solutions
+                  using cutting-edge technologies. My expertise spans across machine learning, natural language
+                  processing, and full-stack web development.
+                </p>
 
-              <div className="grid grid-cols-2 gap-6">
-                {[
-                  { number: "AI", label: "Specialist" },
-                  { number: "10+", label: "Projects" },
-                  { number: "6+", label: "Months Experience" },
-                  { number: "100%", label: "Dedication" }
-                ].map((stat, index) => (
-                  <div key={index} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 text-center hover:bg-white/10 transition-colors">
-                    <div className="text-3xl font-bold text-blue-400 mb-2">{stat.number}</div>
-                    <div className="text-gray-300 font-medium">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex justify-center">
-              <div className="w-80 h-80 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center border border-white/20 backdrop-blur-md">
-                <div className="w-64 h-64 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                  <img
-                    src="/image.jpg"
-                    alt="Muhammad Junaid Sarfraz"
-                    className="w-64 h-64 rounded-full object-cover"
-                  />
+                <div className="grid grid-cols-2 gap-6">
+                  {[
+                    { number: "AI", label: "Specialist" },
+                    { number: "10+", label: "Projects" },
+                    { number: "6+", label: "Months Experience" },
+                    { number: "100%", label: "Dedication" }
+                  ].map((stat, index) => (
+                    <ScrollReveal 
+                      key={index} 
+                      animation="scaleIn" 
+                      delay={400 + (index * 100)}
+                      duration={600}
+                    >
+                      <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 text-center hover:bg-white/10 transition-colors">
+                        <div className="text-3xl font-bold text-blue-400 mb-2">{stat.number}</div>
+                        <div className="text-gray-300 font-medium">{stat.label}</div>
+                      </div>
+                    </ScrollReveal>
+                  ))}
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
+
+            <ScrollReveal animation="fadeInRight" delay={300} duration={800}>
+              <div className="flex justify-center">
+                <div className="w-80 h-80 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center border border-white/20 backdrop-blur-md">
+                  <div className="w-64 h-64 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <img
+                      src="/image.jpg"
+                      alt="Muhammad Junaid Sarfraz"
+                      className="w-64 h-64 rounded-full object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -509,16 +597,25 @@ function App() {
       {/* Projects Section */}
       <section id="projects" className="py-20">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold mb-4" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              Featured Projects
-            </h2>
-            <p className="text-xl text-gray-300">Innovative AI solutions and applications</p>
-          </div>
+          <ScrollReveal animation="fadeInUp" delay={0}>
+            <div className="text-center mb-16">
+              <h2 className="text-5xl font-bold mb-4" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                Featured Projects
+              </h2>
+              <p className="text-xl text-gray-300">Innovative AI solutions and applications</p>
+            </div>
+          </ScrollReveal>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {projects.map((project, index) => (
-              <ProjectCard key={index} {...project} />
+              <ScrollReveal 
+                key={index} 
+                animation="fadeInUp" 
+                delay={index * 100}
+                duration={800}
+              >
+                <ProjectCard {...project} />
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -527,16 +624,25 @@ function App() {
       {/* Skills Section */}
       <section id="skills" className="py-20" style={{ backgroundColor: '#1e293b' }}>
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold mb-4" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              Skills & Technologies
-            </h2>
-            <p className="text-xl text-gray-300">Technologies I work with</p>
-          </div>
+          <ScrollReveal animation="fadeInUp" delay={0}>
+            <div className="text-center mb-16">
+              <h2 className="text-5xl font-bold mb-4" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                Skills & Technologies
+              </h2>
+              <p className="text-xl text-gray-300">Technologies I work with</p>
+            </div>
+          </ScrollReveal>
 
           <div className="grid lg:grid-cols-2 gap-8">
             {skillCategories.map((category, index) => (
-              <SkillCategory key={index} {...category} />
+              <ScrollReveal 
+                key={index} 
+                animation={index % 2 === 0 ? "fadeInLeft" : "fadeInRight"} 
+                delay={index * 150}
+                duration={800}
+              >
+                <SkillCategory {...category} />
+              </ScrollReveal>
             ))}
           </div>
         </div>
