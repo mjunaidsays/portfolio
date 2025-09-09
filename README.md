@@ -133,12 +133,6 @@ This portfolio follows modern design principles:
 - **Accessibility**: Inclusive design that works for everyone
 - **Performance**: Fast loading and smooth interactions
 
-## 📧 Contact
-
-- **Email**: mjunaid2282001@gmail.com
-- **Phone**: +92 321 6602501
-- **Location**: Pakistan
-
 ## 📄 License
 
 This project is open source and available under the [MIT License](LICENSE).
