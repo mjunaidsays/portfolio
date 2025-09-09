@@ -25,4 +25,4 @@ dist-ssr
 .env
 
 # Config files with secrets
-src/config.ts
+# src/config.ts
