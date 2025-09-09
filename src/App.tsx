@@ -495,7 +495,7 @@ function App() {
               <div className="w-80 h-80 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center border border-white/20 backdrop-blur-md">
                 <div className="w-64 h-64 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                   <img
-                    src="./src/image.jpg"
+                    src="/image.jpg"
                     alt="Muhammad Junaid Sarfraz"
                     className="w-64 h-64 rounded-full object-cover"
                   />
