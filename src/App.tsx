@@ -20,7 +20,14 @@ import {
   Users,
   Zap,
   CloudSun,
-  Languages
+  Languages,
+  GraduationCap,
+  Briefcase,
+  Calendar,
+  Building,
+  ArrowUp,
+  Twitter,
+  Heart
 } from 'lucide-react';
 
 // Custom Hook for Scroll Animations
@@ -263,6 +270,96 @@ const SkillCategory = ({ title, skills, icon: Icon }: { title: string, skills: s
   </div>
 );
 
+// Education Card Component
+const EducationCard = ({ degree, university, duration, cgpa }: { degree: string, university: string, duration: string, cgpa: string }) => (
+  <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-all duration-500 hover:border-blue-400/30 hover:shadow-xl">
+    <div className="flex items-center gap-4 mb-6">
+      <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
+        <GraduationCap className="w-8 h-8 text-white" />
+      </div>
+      <div>
+        <h3 className="text-xl font-bold text-white">{degree}</h3>
+        <p className="text-blue-400 font-medium">{university}</p>
+      </div>
+    </div>
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <Calendar className="w-5 h-5 text-gray-400" />
+        <span className="text-gray-300">{duration}</span>
+      </div>
+      <div className="flex items-center gap-3">
+        <Award className="w-5 h-5 text-gray-400" />
+        <span className="text-gray-300">CGPA: <span className="text-blue-400 font-semibold">{cgpa}</span></span>
+      </div>
+    </div>
+  </div>
+);
+
+// Experience Card Component
+const ExperienceCard = ({ position, company, duration, isCurrent = false }: { position: string, company: string, duration: string, isCurrent?: boolean }) => (
+  <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-all duration-500 hover:border-blue-400/30 hover:shadow-xl">
+    <div className="flex items-center gap-4 mb-6">
+      <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
+        <Briefcase className="w-8 h-8 text-white" />
+      </div>
+      <div className="flex-1">
+        <h3 className="text-xl font-bold text-white">{position}</h3>
+        <div className="flex items-center gap-2">
+          <Building className="w-4 h-4 text-gray-400" />
+          <p className="text-blue-400 font-medium">{company}</p>
+          {isCurrent && (
+            <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-medium border border-green-500/30">
+              Current
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+    <div className="flex items-center gap-3">
+      <Calendar className="w-5 h-5 text-gray-400" />
+      <span className="text-gray-300">{duration}</span>
+    </div>
+  </div>
+);
+
+// Back to Top Button Component
+const BackToTopButton = () => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const toggleVisibility = () => {
+      if (window.pageYOffset > 300) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+
+    window.addEventListener('scroll', toggleVisibility);
+    return () => window.removeEventListener('scroll', toggleVisibility);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
+  return (
+    <>
+      {isVisible && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-8 right-8 z-50 w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all duration-300 hover:shadow-blue-500/25"
+        >
+          <ArrowUp className="w-6 h-6 text-white" />
+        </button>
+      )}
+    </>
+  );
+};
+
 // Main App Component
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -276,6 +373,8 @@ function App() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
 
   const scrollToSection = (sectionId: string) => {
@@ -285,6 +384,18 @@ function App() {
       setActiveSection(sectionId);
     }
     setIsMenuOpen(false);
+  };
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newsletterEmail.trim()) {
+      setNewsletterStatus('success');
+      setNewsletterEmail('');
+      setTimeout(() => setNewsletterStatus('idle'), 3000);
+    } else {
+      setNewsletterStatus('error');
+      setTimeout(() => setNewsletterStatus('idle'), 3000);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -420,10 +531,41 @@ function App() {
     }
   ];
 
+  const education = [
+    {
+      degree: "Bachelor of Science in Computer Science",
+      university: "NCBA&E University",
+      duration: "2021 - 2025",
+      cgpa: "3.34/4.00"
+    }
+  ];
+
+  const experience = [
+    {
+      position: "AI Engineer",
+      company: "Nuclieos",
+      duration: "July 2025 - Present",
+      isCurrent: true
+    },
+    {
+      position: "AI Engineer Intern",
+      company: "Nuclieos",
+      duration: "April 2025 - June 2025",
+      isCurrent: false
+    },
+    {
+      position: "AI/ML Engineer Intern",
+      company: "MindRind",
+      duration: "March 2025 - April 2025",
+      isCurrent: false
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-slate-900 text-white" style={{ backgroundColor: '#0f172a' }}>
       <ParticleField />
       <CursorTrail />
+      <BackToTopButton />
 
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #334155' }}>
@@ -434,7 +576,7 @@ function App() {
             </div>
 
             <div className="hidden md:flex items-center space-x-8">
-              {['home', 'about', 'projects', 'skills', 'contact'].map((section) => (
+              {['home', 'about', 'education', 'experience', 'projects', 'skills', 'contact'].map((section) => (
                 <button
                   key={section}
                   onClick={() => scrollToSection(section)}
@@ -469,7 +611,7 @@ function App() {
         {isMenuOpen && (
           <div className="md:hidden bg-black/40 backdrop-blur-md border-t border-white/10">
             <div className="px-6 py-4 space-y-4">
-              {['home', 'about', 'projects', 'skills', 'contact'].map((section) => (
+              {['home', 'about', 'education', 'experience', 'projects', 'skills', 'contact'].map((section) => (
                 <button
                   key={section}
                   onClick={() => scrollToSection(section)}
@@ -590,6 +732,60 @@ function App() {
                 </div>
               </div>
             </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Education Section */}
+      <section id="education" className="py-20">
+        <div className="max-w-7xl mx-auto px-6">
+          <ScrollReveal animation="fadeInUp" delay={0}>
+            <div className="text-center mb-16">
+              <h2 className="text-5xl font-bold mb-4" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                Education
+              </h2>
+              <p className="text-xl text-gray-300">My academic journey</p>
+            </div>
+          </ScrollReveal>
+
+          <div className="max-w-4xl mx-auto">
+            {education.map((edu, index) => (
+              <ScrollReveal 
+                key={index} 
+                animation="fadeInUp" 
+                delay={index * 100}
+                duration={800}
+              >
+                <EducationCard {...edu} />
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Experience Section */}
+      <section id="experience" className="py-20" style={{ backgroundColor: '#1e293b' }}>
+        <div className="max-w-7xl mx-auto px-6">
+          <ScrollReveal animation="fadeInUp" delay={0}>
+            <div className="text-center mb-16">
+              <h2 className="text-5xl font-bold mb-4" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                Professional Experience
+              </h2>
+              <p className="text-xl text-gray-300">My career journey in AI engineering</p>
+            </div>
+          </ScrollReveal>
+
+          <div className="max-w-4xl mx-auto space-y-6">
+            {experience.map((exp, index) => (
+              <ScrollReveal 
+                key={index} 
+                animation="fadeInUp" 
+                delay={index * 100}
+                duration={800}
+              >
+                <ExperienceCard {...exp} />
+              </ScrollReveal>
+            ))}
           </div>
         </div>
       </section>
@@ -765,11 +961,129 @@ function App() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 border-t" style={{ backgroundColor: '#1e293b', borderTop: '1px solid #334155' }}>
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <p className="text-gray-400">
-            © 2025 Muhammad Junaid Sarfraz. All rights reserved.
-          </p>
+      <footer className="py-16 border-t" style={{ backgroundColor: '#1e293b', borderTop: '1px solid #334155' }}>
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-8 mb-12">
+            {/* Brand & Description */}
+            <div className="lg:col-span-1">
+              <div className="mb-6">
+                <div className="text-3xl font-bold mb-4" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  MJ
+                </div>
+                <p className="text-gray-300 leading-relaxed mb-6">
+                  Full Stack AI Engineer passionate about creating intelligent solutions that solve real-world problems.
+                </p>
+                <div className="flex gap-4">
+                  <a href="https://github.com/mjunaidsays" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors">
+                    <Github className="w-5 h-5" />
+                  </a>
+                  <a href="https://www.linkedin.com/in/m-junaid2282001" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors">
+                    <Linkedin className="w-5 h-5" />
+                  </a>
+                  <a href="mailto:mjunaid2282001@gmail.com" className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors">
+                    <Mail className="w-5 h-5" />
+                  </a>
+                  <a href="#" className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors">
+                    <Twitter className="w-5 h-5" />
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h3 className="text-xl font-bold text-white mb-6">Quick Links</h3>
+              <div className="space-y-4">
+                {[
+                  { name: 'Home', section: 'home' },
+                  { name: 'About', section: 'about' },
+                  { name: 'Education', section: 'education' },
+                  { name: 'Experience', section: 'experience' },
+                  { name: 'Projects', section: 'projects' },
+                  { name: 'Skills', section: 'skills' },
+                  { name: 'Contact', section: 'contact' }
+                ].map((link, index) => (
+                  <button
+                    key={index}
+                    onClick={() => scrollToSection(link.section)}
+                    className="block text-gray-300 hover:text-blue-400 transition-colors text-left"
+                  >
+                    {link.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Contact Info */}
+            <div>
+              <h3 className="text-xl font-bold text-white mb-6">Contact Info</h3>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <Mail className="w-5 h-5 text-blue-400" />
+                  <span className="text-gray-300">mjunaid2282001@gmail.com</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Phone className="w-5 h-5 text-blue-400" />
+                  <span className="text-gray-300">+92 321 6602501</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <MapPin className="w-5 h-5 text-blue-400" />
+                  <span className="text-gray-300">Pakistan</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <GraduationCap className="w-5 h-5 text-blue-400" />
+                  <span className="text-gray-300">NCBA&E University</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Newsletter */}
+            <div>
+              <h3 className="text-xl font-bold text-white mb-6">Stay Updated</h3>
+              <p className="text-gray-300 mb-4">Subscribe to get updates on my latest projects and insights.</p>
+              <form onSubmit={handleNewsletterSubmit} className="space-y-3">
+                <input
+                  type="email"
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
+                  placeholder="Your email address"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 focus:bg-white/10 transition-all duration-300"
+                />
+                <button
+                  type="submit"
+                  className="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg font-semibold hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-blue-500/25"
+                >
+                  Subscribe
+                </button>
+                {newsletterStatus === 'success' && (
+                  <div className="text-green-400 text-sm">
+                    ✅ Successfully subscribed!
+                  </div>
+                )}
+                {newsletterStatus === 'error' && (
+                  <div className="text-red-400 text-sm">
+                    ❌ Please enter a valid email.
+                  </div>
+                )}
+              </form>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="border-t border-white/10 pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="flex items-center gap-2 text-gray-400">
+                <span>© 2025 Muhammad Junaid Sarfraz. Made with</span>
+                <Heart className="w-4 h-4 text-red-500" />
+                <span>All rights reserved.</span>
+              </div>
+              <div className="flex gap-6 text-sm">
+                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">Privacy Policy</a>
+                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">Terms of Service</a>
+                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">Cookie Policy</a>
+              </div>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
