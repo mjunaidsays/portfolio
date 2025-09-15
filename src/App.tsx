@@ -27,8 +27,10 @@ import {
   Building,
   ArrowUp,
   Twitter,
-  Heart
+  Heart,
+  Clock
 } from 'lucide-react';
+import { time } from 'framer-motion/dom';
 
 // Custom Hook for Scroll Animations
 const useScrollAnimation = (threshold = 0.1) => {
@@ -858,7 +860,8 @@ function App() {
             <div className="space-y-8">
               {[
                 { icon: Mail, title: "Email", value: "mjunaid2282001@gmail.com" },
-                { icon: Phone, title: "Phone", value: "+92 321 6602501" },
+                // { icon: Phone, title: "Phone", value: "+92 *** ********" },
+                { icon: Clock, title: "Availability", value: "Mon - Fri, 9AM - 6PM, UTC +05:00" },
                 { icon: MapPin, title: "Location", value: "Pakistan" }
               ].map((contact, index) => (
                 <div key={index} className="flex items-center gap-6">
@@ -983,9 +986,9 @@ function App() {
                   <a href="mailto:mjunaid2282001@gmail.com" className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors">
                     <Mail className="w-5 h-5" />
                   </a>
-                  <a href="#" className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors">
+                  {/* <a href="#" className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors">
                     <Twitter className="w-5 h-5" />
-                  </a>
+                  </a> */}
                 </div>
               </div>
             </div>
@@ -1022,9 +1025,13 @@ function App() {
                   <Mail className="w-5 h-5 text-blue-400" />
                   <span className="text-gray-300">mjunaid2282001@gmail.com</span>
                 </div>
-                <div className="flex items-center gap-3">
+                {/* <div className="flex items-center gap-3">
                   <Phone className="w-5 h-5 text-blue-400" />
-                  <span className="text-gray-300">+92 321 6602501</span>
+                  <span className="text-gray-300">+92 *** *******</span>
+                </div> */}
+                <div className="flex items-center gap-3">
+                  <Clock className="w-5 h-5 text-blue-400" />
+                  <span className="text-gray-300">Mon-Fri, 9AM-6PM, UTC +05:00</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <MapPin className="w-5 h-5 text-blue-400" />
