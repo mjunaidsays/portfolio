@@ -702,7 +702,7 @@ function App() {
                   {[
                     { number: "AI", label: "Specialist" },
                     { number: "10+", label: "Projects" },
-                    { number: "6+", label: "Months Experience" },
+                    { number: "1+", label: "Years Experience" },
                     { number: "100%", label: "Dedication" }
                   ].map((stat, index) => (
                     <ScrollReveal 
