@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import emailjs from '@emailjs/browser';
 import { emailjsConfig } from './config';
+import { ChatWidget } from './components/ChatWidget';
 import { 
   Brain, 
   Code, 
@@ -353,7 +354,8 @@ const BackToTopButton = () => {
       {isVisible && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-50 w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all duration-300 hover:shadow-blue-500/25"
+          className="fixed bottom-28 right-8 z-40 w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all duration-300 hover:shadow-blue-500/25"
+          aria-label="Back to top"
         >
           <ArrowUp className="w-6 h-6 text-white" />
         </button>
@@ -568,6 +570,7 @@ function App() {
       <ParticleField />
       <CursorTrail />
       <BackToTopButton />
+      <ChatWidget />
 
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #334155' }}>
