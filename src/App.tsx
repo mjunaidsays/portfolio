@@ -948,7 +948,7 @@ function App() {
                 
                 {submitStatus === 'success' && (
                   <div className="text-center text-green-400 text-sm p-3 bg-green-400/10 rounded-lg border border-green-400/20">
-                    ✅ Message sent successfully! I'll get back to you soon.
+                    Message sent successfully! I'll get back to you soon.
                   </div>
                 )}
                 
