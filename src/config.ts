@@ -5,25 +5,28 @@ export const emailjsConfig = {
   publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'w2JwDNW3V4NGOgU2J'
 };
 
+const DEFAULT_CHAT_API_BASE =
+  'https://cogit-saas-backend-dev.mangoglacier-fb4fbd6a.westeurope.azurecontainerapps.io';
+
 /** Strip `/widget.js` if pasted by mistake; script URL is always `${base}/widget.js`. */
 function normalizeChatWidgetBase(raw: string): string {
   let u = raw.trim().replace(/\/$/, '');
   if (u.endsWith('/widget.js')) {
     u = u.slice(0, -'/widget.js'.length);
   }
-  return u.replace(/\/$/, '') || 'http://localhost:3001';
+  return u.replace(/\/$/, '') || DEFAULT_CHAT_API_BASE;
 }
 
 /** Cogit-style embed: `data-base` points at your API; the script file may live elsewhere. */
 export const chatWidgetConfig = {
   baseUrl: normalizeChatWidgetBase(
-    import.meta.env.VITE_CHAT_WIDGET_BASE || 'http://localhost:3001'
+    import.meta.env.VITE_CHAT_WIDGET_BASE || DEFAULT_CHAT_API_BASE
   ),
   deploymentId:
-    import.meta.env.VITE_CHAT_DEPLOYMENT_ID || 'cmnod4t5r000dsu26k3ewaeye',
+    import.meta.env.VITE_CHAT_DEPLOYMENT_ID || 'cmnr9an5x05ko7be76hbfkggn',
   token:
     import.meta.env.VITE_CHAT_TOKEN ||
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZW5hbnRJZCI6ImNtbTA1ODY3ODAwMDhmN25yY2E1dWczZW8iLCJpc3MiOiJjb2dpdCIsImlhdCI6MTc3NTAyNTEyM30.idOLVNuV9RDaE1ofhjhEbyHedBDdIXPneaMIV1MFcOo',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZW5hbnRJZCI6ImNvZ2l0LWRldi10ZW5hbnQtMiIsImlzcyI6ImNvZ2l0IiwiaWF0IjoxNzc1NzE2OTIyfQ.FXQumyZW7A69w-1cdyOJnzbE6B_cApZuM7yWIDrMTYU',
   /** Where the iframe loads the chat SPA (chat-window). Required if widget.js is same-origin as your site. */
   iframeOrigin: import.meta.env.VITE_CHAT_IFRAME_ORIGIN?.trim() || ''
 };
