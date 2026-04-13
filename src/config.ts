@@ -5,8 +5,7 @@ export const emailjsConfig = {
   publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'w2JwDNW3V4NGOgU2J'
 };
 
-const DEFAULT_CHAT_API_BASE =
-  'https://cogit-saas-backend-dev.mangoglacier-fb4fbd6a.westeurope.azurecontainerapps.io';
+const DEFAULT_CHAT_API_BASE = 'http://localhost:3001';
 
 /** Strip `/widget.js` if pasted by mistake; script URL is always `${base}/widget.js`. */
 function normalizeChatWidgetBase(raw: string): string {
@@ -23,10 +22,10 @@ export const chatWidgetConfig = {
     import.meta.env.VITE_CHAT_WIDGET_BASE || DEFAULT_CHAT_API_BASE
   ),
   deploymentId:
-    import.meta.env.VITE_CHAT_DEPLOYMENT_ID || 'cmnr9an5x05ko7be76hbfkggn',
+    import.meta.env.VITE_CHAT_DEPLOYMENT_ID || 'cmnx2zkuf000w8kxtu2mlhww9',
   token:
     import.meta.env.VITE_CHAT_TOKEN ||
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZW5hbnRJZCI6ImNvZ2l0LWRldi10ZW5hbnQtMiIsImlzcyI6ImNvZ2l0IiwiaWF0IjoxNzc1NzE2OTIyfQ.FXQumyZW7A69w-1cdyOJnzbE6B_cApZuM7yWIDrMTYU',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZW5hbnRJZCI6ImNtbTA1ODY3ODAwMDhmN25yY2E1dWczZW8iLCJpc3MiOiJjb2dpdCIsImlhdCI6MTc3NTQ2NTQ5OX0.7UjFc0hBObDT9oiN_sXtbQPA0w5pUQy2ynqyPAtM1eE',
   /** Where the iframe loads the chat SPA (chat-window). Required if widget.js is same-origin as your site. */
   iframeOrigin: import.meta.env.VITE_CHAT_IFRAME_ORIGIN?.trim() || ''
 };
