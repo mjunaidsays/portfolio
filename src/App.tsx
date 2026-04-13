@@ -513,7 +513,7 @@ function App() {
   const skillCategories = [
     {
       title: "AI & Machine Learning",
-      skills: ["Python", "TensorFlow", "PyTorch", "Scikit-learn", "Pandas", "NumPy", "OpenAI", "LLMs"],
+      skills: ["Python", "TensorFlow", "PyTorch", "Scikit-learn", "Pandas", "NumPy", "OpenAI", "LLM's"],
       icon: Brain
     },
     {
@@ -666,7 +666,7 @@ function App() {
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-3xl"></div>
             <FloatingCard icon={Brain} title="AI/ML" delay={0} position="top-16 left-12" animation="float" />
             <FloatingCard icon={Code} title="Full Stack" delay={1} position="top-20 right-16" animation="float2" />
-            <FloatingCard icon={Bot} title="LLMs" delay={2} position="bottom-20 left-20" animation="float3" />
+            <FloatingCard icon={Bot} title="LLM's" delay={2} position="bottom-20 left-20" animation="float3" />
             <FloatingCard icon={Languages} title="Python" delay={3} position="top-45 left-1/2 transform -translate-x-1/2" animation="float2" />
             <FloatingCard icon={Zap} title="Databases" delay={4} position="bottom-16 right-12" animation="float2" />
           </div>
