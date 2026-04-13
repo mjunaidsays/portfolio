@@ -62,7 +62,7 @@ export function ChatWidget() {
         console.error(
           '[ChatWidget] Failed to load',
           script.src,
-          '\nFix .env: only one VITE_CHAT_WIDGET_SCRIPT_URL line. Use /widget.js with public/widget.js, or a URL that returns real JavaScript.'
+          '\nUse VITE_CHAT_WIDGET_SCRIPT_URL=/widget.js (public/widget.js). External/ngrok URLs often break (tunnel down or browser interstitial). Set VITE_CHAT_IFRAME_ORIGIN to your chat-window app (e.g. http://localhost:5174).'
         );
       };
       document.body.appendChild(script);
