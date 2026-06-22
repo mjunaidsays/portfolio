@@ -386,6 +386,23 @@ function App() {
     setIsMenuOpen(false);
   };
 
+  // When arriving via a hash link (e.g. /#skills from the projects page),
+  // the browser fires its native scroll before React has rendered the sections.
+  // Re-trigger the scroll after mount so the correct section is reached.
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (!hash) return;
+    const sectionId = hash.slice(1);
+    const timer = setTimeout(() => {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+        setActiveSection(sectionId);
+      }
+    }, 80);
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (newsletterEmail.trim()) {

@@ -397,7 +397,7 @@ export default function ProjectsPage() {
             className="inline-flex items-center gap-2 mb-8 px-5 py-2.5 bg-white/5 border border-white/10 rounded-full text-gray-300 hover:text-white hover:bg-white/10 hover:border-blue-400/30 transition-all duration-300 text-sm font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Portfolio
+            Back to Home
           </button>
 
           <h1 className="text-5xl lg:text-7xl font-bold mb-6" style={gradientText}>
