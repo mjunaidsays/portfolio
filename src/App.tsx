@@ -17,20 +17,17 @@ import {
   Moon,
   ExternalLink,
   Award,
-  Users,
   Zap,
-  CloudSun,
   Languages,
   GraduationCap,
   Briefcase,
   Calendar,
   Building,
   ArrowUp,
-  Twitter,
   Heart,
   Clock
 } from 'lucide-react';
-import { time } from 'framer-motion/dom';
+import { useNavigate } from 'react-router-dom';
 
 // Custom Hook for Scroll Animations
 const useScrollAnimation = (threshold = 0.1) => {
@@ -364,6 +361,7 @@ const BackToTopButton = () => {
 
 // Main App Component
 function App() {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [activeSection, setActiveSection] = useState('home');
@@ -461,51 +459,51 @@ function App() {
 
   const projects = [
     {
-      title: "AI Chatbot for Code Development",
-      description: "Built an AI code generator using Next.js, React, and TailwindCSS with modern UI and dark mode. Integrated Google Generative AI for prompt-based code generation with live preview using Sandpack and secure Google OAuth login.",
-      technologies: ["Next.js", "React", "TailwindCSS", "Google AI", "Sandpack", "OAuth"],
+      title: "Cogit Saas",
+      description: "Developing AI agents for automated business workflows using Python, FastAPI, Next.js, PostgreSQL, and OpenRouter. Engineered an Invoice Processor that transcribes calls, extracts entities, and automates credit note posting to Lexoffice. Enabled widget generation and email-processing automation.",
+      technologies: ["Python", "FastAPI", "Next.js", "PostgreSQL", "OpenRouter", "AI Agents"],
       icon: Bot,
-      gradient: "bg-gradient-to-br from-purple-500 to-pink-600",
+      gradient: "bg-gradient-to-br from-blue-500 to-indigo-600",
       link: "#"
     },
     {
-      title: "Desktop Assistant in Python",
-      description: "Built an AI desktop assistant using Python and Tkinter with voice command support. Integrated Speech Recognition, Text-to-Speech, and real-world APIs for automation including weather updates, web browsing, and system operations.",
-      technologies: ["Python", "Tkinter", "Speech Recognition", "TTS", "APIs"],
-      icon: Brain,
-      gradient: "bg-gradient-to-br from-green-500 to-teal-600",
+      title: "SEObot",
+      description: "Designed an AI-driven SEO analysis platform with automated website audits, issue detection, and AI-generated SEO-friendly article generation. Delivered customizable article editing and optimization controls.",
+      technologies: ["Next.js", "Supabase", "OpenRouter", "PostHog", "AI"],
+      icon: Zap,
+      gradient: "bg-gradient-to-br from-green-500 to-emerald-600",
       link: "#"
     },
     {
-      title: "AI-based WebRTC App",
-      description: "Developed a WebRTC-based video conferencing app using ReactJS and FastAPI. Integrated Jitsi for video/audio calling, screen sharing, and real-time messaging with AI-powered meeting transcription using Deepgram API and meeting summaries with OpenAI API.",
-      technologies: ["ReactJS", "FastAPI", "WebRTC", "Jitsi", "Deepgram", "OpenAI"],
-      icon: Users,
-      gradient: "bg-gradient-to-br from-blue-500 to-cyan-600",
+      title: "LocalSEO",
+      description: "Built a Local SEO analytics platform to evaluate business visibility in local markets. Generated AI-powered optimization recommendations and implemented editable recommendation workflows to improve local search presence.",
+      technologies: ["Next.js", "Supabase", "OpenRouter", "PostHog", "Local SEO"],
+      icon: MapPin,
+      gradient: "bg-gradient-to-br from-cyan-500 to-blue-600",
       link: "#"
     },
     {
-      title: "Medical Chatbot with Speech-to-Speech",
-      description: "Advanced medical AI system with dual modules: Exam Bot for medical evaluation and Patient Bot for healthcare queries. Features real-time speech-to-speech interaction using RAG and LLM technologies.",
-      technologies: ["Python", "NLP", "RAG", "Speech AI", "LLM"],
+      title: "Flexify",
+      description: "Architected an AI-powered WhatsApp automation agent handling hotel, restaurant, and flight bookings alongside email automation. Leveraged FastAPI and LangGraph to orchestrate AI tools integrated with Booking.com, Stripe, Google, and Meta APIs.",
+      technologies: ["FastAPI", "LangGraph", "Meta APIs", "Stripe", "Booking.com", "Google APIs"],
+      icon: Phone,
+      gradient: "bg-gradient-to-br from-orange-500 to-red-600",
+      link: "#"
+    },
+    {
+      title: "AI Registrar",
+      description: "Developed a RAG-based AI chatbot that organized and retrieved doctor-patient records from medical conversations. Structured patient datasets and strengthened end-to-end encrypted workflows for healthcare data privacy.",
+      technologies: ["RAG", "LLM", "Python", "PostgreSQL", "Healthcare AI"],
+      icon: Award,
+      gradient: "bg-gradient-to-br from-purple-500 to-violet-600",
+      link: "#"
+    },
+    {
+      title: "Medical Exambot & Chatbot",
+      description: "Built an AI medical chatbot with real-time speech-to-speech using FastAPI and ReactJS. Dual modules: Exam Bot for Q&A evaluation and Medical Assistant Bot powered by RAG and LLM. Integrated ElevenLabs, Deepgram, and LiveKit for low-latency voice interactions.",
+      technologies: ["FastAPI", "ReactJS", "ElevenLabs", "Deepgram", "LiveKit", "RAG"],
       icon: Brain,
       gradient: "bg-gradient-to-br from-red-500 to-orange-600",
-      link: "#"
-    },
-    {
-      title: "Weather Detection Application",
-      description: "Intelligent weather prediction and analysis system with real-time data processing and accurate forecasting capabilities. Built with machine learning algorithms for enhanced accuracy.",
-      technologies: ["React", "APIs", "ML", "Data Analysis", "Python"],
-      icon: CloudSun,
-      gradient: "bg-gradient-to-br from-yellow-500 to-orange-600",
-      link: "#"
-    },
-    {
-      title: "RAG-based Chatbots",
-      description: "Multiple intelligent chatbot systems utilizing Retrieval-Augmented Generation for enhanced context understanding and response accuracy. Integrated with vector databases for optimal performance.",
-      technologies: ["RAG", "LangChain", "Vector DB", "OpenAI", "Python"],
-      icon: Bot,
-      gradient: "bg-gradient-to-br from-indigo-500 to-purple-600",
       link: "#"
     }
   ];
@@ -513,12 +511,12 @@ function App() {
   const skillCategories = [
     {
       title: "AI & Machine Learning",
-      skills: ["Python", "TensorFlow", "PyTorch", "Scikit-learn", "Pandas", "NumPy", "OpenAI", "LLM's"],
+      skills: ["Python", "TensorFlow", "PyTorch", "Scikit-learn", "LangGraph", "RAG", "AI Agents", "Generative AI"],
       icon: Brain
     },
     {
       title: "Backend Development",
-      skills: ["Python", "FastAPI", "Django", "Flask", "PostgreSQL", "Pinecone", "Qdrant", "SQL"],
+      skills: ["FastAPI", "Flask", "Django", "PostgreSQL", "SQL", "OpenAI APIs", "AI Integrations", "Fine Tuning"],
       icon: Code
     },
     {
@@ -527,8 +525,8 @@ function App() {
       icon: Zap
     },
     {
-      title: "Data & Analytics",
-      skills: ["Power BI", "Tableau", "Jupyter Notebooks", "Data Analysis", "DSA", "OOP", "AI Project Management"],
+      title: "Data & Tools",
+      skills: ["Power BI", "Tableau", "Pandas", "NumPy", "Data Analysis", "OOP", "DSA", "AI Project Management"],
       icon: Award
     }
   ];
@@ -546,19 +544,13 @@ function App() {
     {
       position: "AI Engineer",
       company: "Nuclieos",
-      duration: "July 2025 - Present",
+      duration: "April 2025 – Present",
       isCurrent: true
     },
     {
-      position: "AI Engineer Intern",
-      company: "Nuclieos",
-      duration: "April 2025 - June 2025",
-      isCurrent: false
-    },
-    {
-      position: "AI/ML Engineer Intern",
+      position: "AI/ML Intern",
       company: "MindRind",
-      duration: "March 2025 - April 2025",
+      duration: "Jan 2025 – April 2025",
       isCurrent: false
     }
   ];
@@ -701,7 +693,7 @@ function App() {
                 <div className="grid grid-cols-2 gap-6">
                   {[
                     { number: "AI", label: "Specialist" },
-                    { number: "10+", label: "Projects" },
+                    { number: "9+", label: "Projects Built" },
                     { number: "1+", label: "Years Experience" },
                     { number: "100%", label: "Dedication" }
                   ].map((stat, index) => (
@@ -800,15 +792,15 @@ function App() {
               <h2 className="text-5xl font-bold mb-4" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 Featured Projects
               </h2>
-              <p className="text-xl text-gray-300">Innovative AI solutions and applications</p>
+              <p className="text-xl text-gray-300">Latest projects · AI solutions built at scale</p>
             </div>
           </ScrollReveal>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {projects.map((project, index) => (
-              <ScrollReveal 
-                key={index} 
-                animation="fadeInUp" 
+              <ScrollReveal
+                key={index}
+                animation="fadeInUp"
                 delay={index * 100}
                 duration={800}
               >
@@ -816,6 +808,19 @@ function App() {
               </ScrollReveal>
             ))}
           </div>
+
+          <ScrollReveal animation="fadeInUp" delay={200}>
+            <div className="flex flex-col items-center gap-3 mt-14">
+              <p className="text-gray-500 text-sm">Showing 6 of 9 projects</p>
+              <button
+                onClick={() => navigate('/projects')}
+                className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl font-semibold hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-blue-500/25 text-white"
+              >
+                View All Projects
+                <ExternalLink className="w-5 h-5" />
+              </button>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -1014,6 +1019,12 @@ function App() {
                     {link.name}
                   </button>
                 ))}
+                <button
+                  onClick={() => navigate('/projects')}
+                  className="block text-blue-400 hover:text-blue-300 transition-colors text-left font-medium"
+                >
+                  All Projects →
+                </button>
               </div>
             </div>
 
@@ -1080,7 +1091,7 @@ function App() {
           <div className="border-t border-white/10 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="flex items-center gap-2 text-gray-400">
-                <span>© 2025 Muhammad Junaid Sarfraz. Made with</span>
+                <span>© 2026 Muhammad Junaid Sarfraz. Made with</span>
                 <Heart className="w-4 h-4 text-red-500" />
                 <span>All rights reserved.</span>
               </div>
