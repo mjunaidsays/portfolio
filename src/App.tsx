@@ -1,5 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import emailjs from '@emailjs/browser';
+import { track } from '@vercel/analytics/react';
 import { emailjsConfig } from './config';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -140,6 +141,7 @@ function App() {
         publicKey
       );
       setSubmitStatus('success');
+      track('Contact Form Submitted');
       setFormData({ name: '', email: '', subject: '', message: '' });
     } catch (error) {
       console.error('Email sending failed:', error);
@@ -406,7 +408,10 @@ function App() {
           >
             {projects.map((project, index) => (
               <motion.div key={index} variants={fadeInUp} custom={index * 0.08}>
-                <ProjectCard project={project} onOpen={setSelectedProject} />
+                <ProjectCard
+                  project={project}
+                  onOpen={(p) => { track('Project Opened', { title: p.title }); setSelectedProject(p); }}
+                />
               </motion.div>
             ))}
           </motion.div>
