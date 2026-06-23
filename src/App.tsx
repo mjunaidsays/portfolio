@@ -1,407 +1,153 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import emailjs from '@emailjs/browser';
 import { emailjsConfig } from './config';
-import { 
-  Brain, 
-  Code, 
-  Bot, 
-  Github, 
-  Linkedin, 
-  Mail, 
-  Phone, 
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Brain,
+  Code,
+  Bot,
+  Github,
+  Linkedin,
+  Mail,
   MapPin,
-  ChevronDown,
-  Menu,
-  X,
-  Sun,
-  Moon,
   ExternalLink,
   Award,
   Zap,
-  Languages,
   GraduationCap,
-  Briefcase,
-  Calendar,
-  Building,
   ArrowUp,
   Heart,
-  Clock
+  Clock,
+  Calendar,
+  Phone,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-// Custom Hook for Scroll Animations
-const useScrollAnimation = (threshold = 0.1) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+import { CustomCursor } from './components/CustomCursor';
+import { ScrollProgress } from './components/ScrollProgress';
+import { Navbar } from './components/Navbar';
+import { HeroSection } from './components/HeroSection';
+import { ExperienceTimeline } from './components/ExperienceTimeline';
+import { ProjectCard } from './components/ProjectCard';
+import type { Project } from './components/ProjectCard';
+import { ProjectModal } from './components/ProjectModal';
+import {
+  fadeInUp,
+  fadeInLeft,
+  fadeInRight,
+  scaleIn,
+  staggerContainer,
+  viewportOnce,
+} from './lib/motionVariants';
+import { useScrollspy } from './hooks/useScrollspy';
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold }
-    );
+const SECTION_IDS = ['home', 'about', 'education', 'experience', 'projects', 'skills', 'contact'];
 
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
-    return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current);
-      }
-    };
-  }, [threshold]);
-
-  return [ref, isVisible] as const;
-};
-
-// Scroll Reveal Component
-const ScrollReveal = ({ 
-  children, 
-  animation = 'fadeInUp', 
-  delay = 0,
-  duration = 600 
-}: { 
-  children: React.ReactNode;
-  animation?: 'fadeInUp' | 'fadeInLeft' | 'fadeInRight' | 'fadeIn' | 'scaleIn';
-  delay?: number;
-  duration?: number;
-}) => {
-  const [ref, isVisible] = useScrollAnimation(0.1);
-
-  const getAnimationClasses = () => {
-    const baseClasses = `transition-all duration-${duration} ease-out`;
-    
-    if (!isVisible) {
-      switch (animation) {
-        case 'fadeInUp':
-          return `${baseClasses} opacity-0 translate-y-8`;
-        case 'fadeInLeft':
-          return `${baseClasses} opacity-0 -translate-x-8`;
-        case 'fadeInRight':
-          return `${baseClasses} opacity-0 translate-x-8`;
-        case 'fadeIn':
-          return `${baseClasses} opacity-0`;
-        case 'scaleIn':
-          return `${baseClasses} opacity-0 scale-95`;
-        default:
-          return `${baseClasses} opacity-0 translate-y-8`;
-      }
-    }
-    
-    return `${baseClasses} opacity-100 translate-y-0 translate-x-0 scale-100`;
-  };
-
+function SectionHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <div
-      ref={ref}
-      className={getAnimationClasses()}
-      style={{ transitionDelay: `${delay}ms` }}
+    <motion.div
+      className="text-center mb-16"
+      variants={fadeInUp}
+      initial="hidden"
+      whileInView="visible"
+      viewport={viewportOnce}
     >
-      {children}
-    </div>
+      <h2 className="font-display text-5xl font-bold gradient-text-electric mb-4">{title}</h2>
+      <p className="text-xl text-gray-400">{subtitle}</p>
+      <div className="w-16 h-px bg-electric-500 mx-auto mt-4 opacity-60" />
+    </motion.div>
   );
-};
+}
 
-// Particle Component
-const ParticleField = () => {
-  const [particles, setParticles] = useState<Array<{ id: number, x: number, y: number, size: number, speed: number }>>([]);
-
-  useEffect(() => {
-    const generateParticles = () => {
-      const newParticles = Array.from({ length: 50 }, (_, i) => ({
-        id: i,
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        size: Math.random() * 3 + 1,
-        speed: Math.random() * 2 + 0.5
-      }));
-      setParticles(newParticles);
-    };
-
-    generateParticles();
-  }, []);
-
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {particles.map((particle) => (
-        <div
-          key={particle.id}
-          className="absolute rounded-full bg-blue-500/20 animate-pulse"
-          style={{
-            left: `${particle.x}%`,
-            top: `${particle.y}%`,
-            width: `${particle.size}px`,
-            height: `${particle.size}px`,
-            animationDuration: `${particle.speed}s`
-          }}
-        />
-      ))}
-    </div>
-  );
-};
-
-// Cursor Trail Component
-const CursorTrail = () => {
-  const [trail, setTrail] = useState<Array<{ id: string, x: number, y: number, opacity: number }>>([]);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const newDot = {
-        id: `dot-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        x: e.clientX,
-        y: e.clientY,
-        opacity: 1
-      };
-
-      setTrail(prev => [newDot, ...prev.slice(0, 4)]); // Keep only 5 dots max
-
-      // Remove the dot after 100ms
-      setTimeout(() => {
-        setTrail(prev => prev.filter(dot => dot.id !== newDot.id));
-      }, 100);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    return () => document.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
-  return (
-    <div className="fixed inset-0 pointer-events-none z-50">
-      {trail.map((dot) => (
-        <div
-          key={dot.id}
-          className="absolute w-1 h-1 bg-blue-400 rounded-full transition-all duration-100 ease-out"
-          style={{
-            left: dot.x - 2,
-            top: dot.y - 2,
-            opacity: dot.opacity * 0.8,
-            transform: `scale(${dot.opacity})`,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
-
-// Floating Card Component
-const FloatingCard = ({ icon: Icon, title, delay = 0, position, animation = "float" }: { icon: any, title: string, delay?: number, position: string, animation?: string }) => (
-  <div
-    className={`absolute bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 flex items-center gap-3 text-white font-semibold shadow-2xl animate-${animation} ${position}`}
-    style={{ animationDelay: `${delay}s` }}
-  >
-    <Icon className="w-6 h-6 text-blue-400" />
-    <span>{title}</span>
-  </div>
-);
-
-// Project Card Component
-const ProjectCard = ({
-  title,
-  description,
-  technologies,
-  icon: Icon,
-  gradient,
-  link
-}: {
-  title: string;
-  description: string;
-  technologies: string[];
-  icon: any;
-  gradient: string;
-  link?: string;
-}) => (
-  <div className="group relative bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:border-blue-400/30">
-    <div className={`w-16 h-16 ${gradient} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-      <Icon className="w-8 h-8 text-white" />
-    </div>
-    <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-blue-400 transition-colors leading-tight">
-      {title}
-    </h3>
-    <p className="text-gray-300 leading-relaxed mb-6 text-sm">
-      {description}
-    </p>
-    <div className="flex flex-wrap gap-2 mb-6">
-      {technologies.map((tech, index) => (
-        <span
-          key={index}
-          className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-xs font-medium border border-blue-500/30 hover:bg-blue-500/30 transition-colors"
-        >
-          {tech}
-        </span>
-      ))}
-    </div>
-    {link && (
-      <a
-        href={link}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-semibold transition-colors text-sm"
-      >
-        View Project <ExternalLink className="w-4 h-4" />
-      </a>
-    )}
-  </div>
-);
-
-// Skill Category Component
-const SkillCategory = ({ title, skills, icon: Icon }: { title: string, skills: string[], icon: any }) => (
-  <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-all duration-500 hover:border-blue-400/30 hover:shadow-xl">
-    <div className="flex items-center gap-4 mb-6">
-      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-        <Icon className="w-6 h-6 text-white" />
-      </div>
-      <h3 className="text-xl font-bold text-white">{title}</h3>
-    </div>
-    <div className="grid grid-cols-2 gap-3">
-      {skills.map((skill, index) => (
-        <div
-          key={index}
-          className="bg-white/5 border border-white/10 rounded-xl p-3 text-center hover:bg-white/10 hover:border-blue-400/30 transition-all duration-300 cursor-pointer group hover:scale-105"
-        >
-          <span className="text-gray-300 group-hover:text-white font-medium text-sm">{skill}</span>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-// Education Card Component
-const EducationCard = ({ degree, university, duration, cgpa }: { degree: string, university: string, duration: string, cgpa: string }) => (
-  <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-all duration-500 hover:border-blue-400/30 hover:shadow-xl">
-    <div className="flex items-center gap-4 mb-6">
-      <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
-        <GraduationCap className="w-8 h-8 text-white" />
-      </div>
-      <div>
-        <h3 className="text-xl font-bold text-white">{degree}</h3>
-        <p className="text-blue-400 font-medium">{university}</p>
-      </div>
-    </div>
-    <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <Calendar className="w-5 h-5 text-gray-400" />
-        <span className="text-gray-300">{duration}</span>
-      </div>
-      <div className="flex items-center gap-3">
-        <Award className="w-5 h-5 text-gray-400" />
-        <span className="text-gray-300">CGPA: <span className="text-blue-400 font-semibold">{cgpa}</span></span>
-      </div>
-    </div>
-  </div>
-);
-
-// Experience Card Component
-const ExperienceCard = ({ position, company, duration, isCurrent = false }: { position: string, company: string, duration: string, isCurrent?: boolean }) => (
-  <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-all duration-500 hover:border-blue-400/30 hover:shadow-xl">
-    <div className="flex items-center gap-4 mb-6">
-      <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
-        <Briefcase className="w-8 h-8 text-white" />
-      </div>
-      <div className="flex-1">
-        <h3 className="text-xl font-bold text-white">{position}</h3>
-        <div className="flex items-center gap-2">
-          <Building className="w-4 h-4 text-gray-400" />
-          <p className="text-blue-400 font-medium">{company}</p>
-          {isCurrent && (
-            <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-medium border border-green-500/30">
-              Current
-            </span>
-          )}
-        </div>
-      </div>
-    </div>
-    <div className="flex items-center gap-3">
-      <Calendar className="w-5 h-5 text-gray-400" />
-      <span className="text-gray-300">{duration}</span>
-    </div>
-  </div>
-);
-
-// Back to Top Button Component
-const BackToTopButton = () => {
+function BackToTopButton() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const toggleVisibility = () => {
-      if (window.pageYOffset > 300) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
-    };
-
-    window.addEventListener('scroll', toggleVisibility);
-    return () => window.removeEventListener('scroll', toggleVisibility);
+    const toggle = () => setIsVisible(window.scrollY > 300);
+    window.addEventListener('scroll', toggle, { passive: true });
+    return () => window.removeEventListener('scroll', toggle);
   }, []);
 
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  };
-
   return (
-    <>
+    <AnimatePresence>
       {isVisible && (
-        <button
-          onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-50 w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all duration-300 hover:shadow-blue-500/25"
+        <motion.button
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.5 }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="fixed bottom-8 right-8 z-50 w-12 h-12 bg-electric-500 text-base-900 rounded-full flex items-center justify-center glow-electric shadow-2xl"
         >
-          <ArrowUp className="w-6 h-6 text-white" />
-        </button>
+          <ArrowUp className="w-5 h-5" />
+        </motion.button>
       )}
-    </>
+    </AnimatePresence>
   );
-};
+}
 
-// Main App Component
 function App() {
   const navigate = useNavigate();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  const [activeSection, setActiveSection] = useState('home');
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: ''
-  });
+  const activeSection = useScrollspy(SECTION_IDS);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
+  const isTouchDevice = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
 
   const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-      setActiveSection(sectionId);
-    }
-    setIsMenuOpen(false);
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // When arriving via a hash link (e.g. /#skills from the projects page),
-  // the browser fires its native scroll before React has rendered the sections.
-  // Re-trigger the scroll after mount so the correct section is reached.
   useEffect(() => {
     const hash = window.location.hash;
     if (!hash) return;
     const sectionId = hash.slice(1);
     const timer = setTimeout(() => {
-      const element = document.getElementById(sectionId);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-        setActiveSection(sectionId);
-      }
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
     }, 80);
     return () => clearTimeout(timer);
   }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name?.trim() || !formData.email?.trim() || !formData.subject?.trim() || !formData.message?.trim()) {
+      setSubmitStatus('error');
+      setTimeout(() => setSubmitStatus('idle'), 3000);
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const { serviceId, templateId, publicKey } = emailjsConfig;
+      await emailjs.send(
+        serviceId,
+        templateId,
+        {
+          from_name: formData.name,
+          from_email: formData.email,
+          subject: formData.subject,
+          message: formData.message,
+          to_email: 'mjunaid2282001@gmail.com',
+        },
+        publicKey
+      );
+      setSubmitStatus('success');
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (error) {
+      console.error('Email sending failed:', error);
+      setSubmitStatus('error');
+    }
+    setIsSubmitting(false);
+    setTimeout(() => setSubmitStatus('idle'), 5000);
+  };
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -415,610 +161,488 @@ function App() {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate form - check for empty strings and whitespace
-    if (!formData.name?.trim() || !formData.email?.trim() || !formData.subject?.trim() || !formData.message?.trim()) {
-      setSubmitStatus('error');
-      setTimeout(() => setSubmitStatus('idle'), 3000);
-      return;
-    }
-
-    setIsSubmitting(true);
-    
-    try {
-      // EmailJS configuration from config file
-      const { serviceId, templateId, publicKey } = emailjsConfig;
-      
-      // Template parameters
-      const templateParams = {
-        from_name: formData.name,
-        from_email: formData.email,
-        subject: formData.subject,
-        message: formData.message,
-        to_email: 'mjunaid2282001@gmail.com'
-      };
-      
-      // Send email using EmailJS
-      await emailjs.send(serviceId, templateId, templateParams, publicKey);
-      
-      setSubmitStatus('success');
-      
-      // Reset form
-      setFormData({
-        name: '',
-        email: '',
-        subject: '',
-        message: ''
-      });
-      
-    } catch (error) {
-      console.error('Email sending failed:', error);
-      setSubmitStatus('error');
-    }
-    
-    setIsSubmitting(false);
-    
-    // Reset status after 5 seconds
-    setTimeout(() => {
-      setSubmitStatus('idle');
-    }, 5000);
-  };
-
-  const projects = [
+  const projects: Project[] = [
     {
-      title: "Cogit Saas",
-      description: "Developing AI agents for automated business workflows using Python, FastAPI, Next.js, PostgreSQL, and OpenRouter. Engineered an Invoice Processor that transcribes calls, extracts entities, and automates credit note posting to Lexoffice. Enabled widget generation and email-processing automation.",
-      technologies: ["Python", "FastAPI", "Next.js", "PostgreSQL", "OpenRouter", "AI Agents"],
+      title: 'Cogit Saas',
+      description:
+        'Developing AI agents for automated business workflows using Python, FastAPI, Next.js, PostgreSQL, and OpenRouter. Engineered an Invoice Processor that transcribes calls, extracts entities, and automates credit note posting to Lexoffice. Enabled widget generation and email-processing automation.',
+      technologies: ['Python', 'FastAPI', 'Next.js', 'PostgreSQL', 'OpenRouter', 'AI Agents'],
       icon: Bot,
-      gradient: "bg-gradient-to-br from-blue-500 to-indigo-600",
-      link: "#"
+      gradient: 'bg-gradient-to-br from-blue-500 to-indigo-600',
+      link: '#',
     },
     {
-      title: "SEObot",
-      description: "Designed an AI-driven SEO analysis platform with automated website audits, issue detection, and AI-generated SEO-friendly article generation. Delivered customizable article editing and optimization controls.",
-      technologies: ["Next.js", "Supabase", "OpenRouter", "PostHog", "AI"],
+      title: 'SEObot',
+      description:
+        'Designed an AI-driven SEO analysis platform with automated website audits, issue detection, and AI-generated SEO-friendly article generation. Delivered customizable article editing and optimization controls.',
+      technologies: ['Next.js', 'Supabase', 'OpenRouter', 'PostHog', 'AI'],
       icon: Zap,
-      gradient: "bg-gradient-to-br from-green-500 to-emerald-600",
-      link: "#"
+      gradient: 'bg-gradient-to-br from-green-500 to-emerald-600',
+      link: '#',
     },
     {
-      title: "LocalSEO",
-      description: "Built a Local SEO analytics platform to evaluate business visibility in local markets. Generated AI-powered optimization recommendations and implemented editable recommendation workflows to improve local search presence.",
-      technologies: ["Next.js", "Supabase", "OpenRouter", "PostHog", "Local SEO"],
+      title: 'LocalSEO',
+      description:
+        'Built a Local SEO analytics platform to evaluate business visibility in local markets. Generated AI-powered optimization recommendations and implemented editable recommendation workflows to improve local search presence.',
+      technologies: ['Next.js', 'Supabase', 'OpenRouter', 'PostHog', 'Local SEO'],
       icon: MapPin,
-      gradient: "bg-gradient-to-br from-cyan-500 to-blue-600",
-      link: "#"
+      gradient: 'bg-gradient-to-br from-cyan-500 to-blue-600',
+      link: '#',
     },
     {
-      title: "Flexify",
-      description: "Architected an AI-powered WhatsApp automation agent handling hotel, restaurant, and flight bookings alongside email automation. Leveraged FastAPI and LangGraph to orchestrate AI tools integrated with Booking.com, Stripe, Google, and Meta APIs.",
-      technologies: ["FastAPI", "LangGraph", "Meta APIs", "Stripe", "Booking.com", "Google APIs"],
+      title: 'Flexify',
+      description:
+        'Architected an AI-powered WhatsApp automation agent handling hotel, restaurant, and flight bookings alongside email automation. Leveraged FastAPI and LangGraph to orchestrate AI tools integrated with Booking.com, Stripe, Google, and Meta APIs.',
+      technologies: ['FastAPI', 'LangGraph', 'Meta APIs', 'Stripe', 'Booking.com', 'Google APIs'],
       icon: Phone,
-      gradient: "bg-gradient-to-br from-orange-500 to-red-600",
-      link: "#"
+      gradient: 'bg-gradient-to-br from-orange-500 to-red-600',
+      link: '#',
     },
     {
-      title: "AI Registrar",
-      description: "Developed a RAG-based AI chatbot that organized and retrieved doctor-patient records from medical conversations. Structured patient datasets and strengthened end-to-end encrypted workflows for healthcare data privacy.",
-      technologies: ["RAG", "LLM", "Python", "PostgreSQL", "Healthcare AI"],
+      title: 'AI Registrar',
+      description:
+        'Developed a RAG-based AI chatbot that organized and retrieved doctor-patient records from medical conversations. Structured patient datasets and strengthened end-to-end encrypted workflows for healthcare data privacy.',
+      technologies: ['RAG', 'LLM', 'Python', 'PostgreSQL', 'Healthcare AI'],
       icon: Award,
-      gradient: "bg-gradient-to-br from-purple-500 to-violet-600",
-      link: "#"
+      gradient: 'bg-gradient-to-br from-purple-500 to-violet-600',
+      link: '#',
     },
     {
-      title: "Medical Exambot & Chatbot",
-      description: "Built an AI medical chatbot with real-time speech-to-speech using FastAPI and ReactJS. Dual modules: Exam Bot for Q&A evaluation and Medical Assistant Bot powered by RAG and LLM. Integrated ElevenLabs, Deepgram, and LiveKit for low-latency voice interactions.",
-      technologies: ["FastAPI", "ReactJS", "ElevenLabs", "Deepgram", "LiveKit", "RAG"],
+      title: 'Medical Exambot & Chatbot',
+      description:
+        'Built an AI medical chatbot with real-time speech-to-speech using FastAPI and ReactJS. Dual modules: Exam Bot for Q&A evaluation and Medical Assistant Bot powered by RAG and LLM. Integrated ElevenLabs, Deepgram, and LiveKit for low-latency voice interactions.',
+      technologies: ['FastAPI', 'ReactJS', 'ElevenLabs', 'Deepgram', 'LiveKit', 'RAG'],
       icon: Brain,
-      gradient: "bg-gradient-to-br from-red-500 to-orange-600",
-      link: "#"
-    }
+      gradient: 'bg-gradient-to-br from-red-500 to-orange-600',
+      link: '#',
+    },
   ];
 
   const skillCategories = [
     {
-      title: "AI & Machine Learning",
-      skills: ["Python", "TensorFlow", "PyTorch", "Scikit-learn", "LangGraph", "RAG", "AI Agents", "Generative AI"],
-      icon: Brain
+      title: 'AI & Machine Learning',
+      skills: ['Python', 'TensorFlow', 'PyTorch', 'Scikit-learn', 'LangGraph', 'RAG', 'AI Agents', 'Generative AI'],
+      icon: Brain,
     },
     {
-      title: "Backend Development",
-      skills: ["FastAPI", "Flask", "Django", "PostgreSQL", "SQL", "OpenAI APIs", "AI Integrations", "Fine Tuning"],
-      icon: Code
+      title: 'Backend Development',
+      skills: ['FastAPI', 'Flask', 'Django', 'PostgreSQL', 'SQL', 'OpenAI APIs', 'AI Integrations', 'Fine Tuning'],
+      icon: Code,
     },
     {
-      title: "Frontend Development",
-      skills: ["ReactJS", "Next.js", "TypeScript", "TailwindCSS", "MERN Stack", "JavaScript", "HTML5", "CSS3"],
-      icon: Zap
+      title: 'Frontend Development',
+      skills: ['ReactJS', 'Next.js', 'TypeScript', 'TailwindCSS', 'MERN Stack', 'JavaScript', 'HTML5', 'CSS3'],
+      icon: Zap,
     },
     {
-      title: "Data & Tools",
-      skills: ["Power BI", "Tableau", "Pandas", "NumPy", "Data Analysis", "OOP", "DSA", "AI Project Management"],
-      icon: Award
-    }
+      title: 'Data & Tools',
+      skills: ['Power BI', 'Tableau', 'Pandas', 'NumPy', 'Data Analysis', 'OOP', 'DSA', 'AI Project Management'],
+      icon: Award,
+    },
   ];
 
   const education = [
     {
-      degree: "Bachelor of Science in Computer Science",
-      university: "NCBA&E University",
-      duration: "2021 - 2025",
-      cgpa: "3.34/4.00"
-    }
+      degree: 'Bachelor of Science in Computer Science',
+      university: 'NCBA&E University',
+      duration: '2021 - 2025',
+      cgpa: '3.34/4.00',
+    },
   ];
 
   const experience = [
-    {
-      position: "AI Engineer",
-      company: "Nuclieos",
-      duration: "April 2025 – Present",
-      isCurrent: true
-    },
-    {
-      position: "AI/ML Intern",
-      company: "MindRind",
-      duration: "Jan 2025 – April 2025",
-      isCurrent: false
-    }
+    { position: 'AI Engineer', company: 'Nuclieos', duration: 'April 2025 – Present', isCurrent: true },
+    { position: 'AI/ML Intern', company: 'MindRind', duration: 'Jan 2025 – April 2025', isCurrent: false },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white" style={{ backgroundColor: '#0f172a' }}>
-      <ParticleField />
-      <CursorTrail />
+    <div className="min-h-screen text-white" style={{ backgroundColor: '#080C14' }}>
+      {!isTouchDevice && <CustomCursor />}
+      <ScrollProgress />
       <BackToTopButton />
+      <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />
 
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #334155' }}>
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="text-2xl font-bold" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              MJ
-            </div>
+      <Navbar activeSection={activeSection} onNavigate={scrollToSection} />
 
-            <div className="hidden md:flex items-center space-x-8">
-              {['home', 'about', 'education', 'experience', 'projects', 'skills', 'contact'].map((section) => (
-                <button
-                  key={section}
-                  onClick={() => scrollToSection(section)}
-                  className={`capitalize font-medium transition-colors ${activeSection === section ? 'text-blue-400' : 'text-gray-300 hover:text-white'
-                    }`}
-                  style={{ color: activeSection === section ? '#3b82f6' : '#cbd5e1' }}
-                >
-                  {section}
-                </button>
-              ))}
-            </div>
+      {/* Hero */}
+      <HeroSection onNavigate={scrollToSection} />
 
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setIsDarkMode(!isDarkMode)}
-                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
-              >
-                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
-
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="md:hidden p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
-              >
-                {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-black/40 backdrop-blur-md border-t border-white/10">
-            <div className="px-6 py-4 space-y-4">
-              {['home', 'about', 'education', 'experience', 'projects', 'skills', 'contact'].map((section) => (
-                <button
-                  key={section}
-                  onClick={() => scrollToSection(section)}
-                  className="block w-full text-left capitalize font-medium text-gray-300 hover:text-white transition-colors"
-                >
-                  {section}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </nav>
-
-      {/* Hero Section */}
-      <section id="home" className="min-h-screen flex items-center justify-center relative overflow-hidden pt-20">
-        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
-          <div className="space-y-8">
-            <div className="space-y-6">
-              <p className="text-xl text-gray-300 font-medium">Hi, I'm</p>
-              <h1 className="text-5xl lg:text-7xl font-bold leading-tight" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Muhammad Junaid Sarfraz
-              </h1>
-              <div className="text-2xl lg:text-3xl font-semibold" style={{ color: '#10b981' }}>
-                Full Stack AI Engineer
-              </div>
-            </div>
-
-            <p className="text-lg text-gray-300 leading-relaxed max-w-2xl">
-              Passionate software engineer specializing in AI/ML solutions, full-stack development,
-              and cutting-edge technologies. Building intelligent applications that solve real-world problems.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <button
-                onClick={() => scrollToSection('projects')}
-                className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl font-semibold hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-blue-500/25"
-              >
-                View My Work
-              </button>
-              <button
-                onClick={() => scrollToSection('contact')}
-                className="px-8 py-4 border-2 border-white/20 rounded-2xl font-semibold hover:bg-white/10 hover:border-white/40 transition-all duration-300"
-              >
-                Get In Touch
-              </button>
-            </div>
-          </div>
-
-          <div className="relative h-96 lg:h-[500px] flex items-center justify-center">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-3xl"></div>
-            <FloatingCard icon={Brain} title="AI/ML" delay={0} position="top-16 left-12" animation="float" />
-            <FloatingCard icon={Code} title="Full Stack" delay={1} position="top-20 right-16" animation="float2" />
-            <FloatingCard icon={Bot} title="LLM's" delay={2} position="bottom-20 left-20" animation="float3" />
-            <FloatingCard icon={Languages} title="Python" delay={3} position="top-45 left-1/2 transform -translate-x-1/2" animation="float2" />
-            <FloatingCard icon={Zap} title="Databases" delay={4} position="bottom-16 right-12" animation="float2" />
-          </div>
-        </div>
-
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <ChevronDown className="w-8 h-8 text-gray-400" />
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section id="about" className="py-20" style={{ backgroundColor: '#1e293b' }}>
+      {/* About */}
+      <section id="about" className="py-24" style={{ backgroundColor: '#0D1117' }}>
         <div className="max-w-7xl mx-auto px-6">
-          <ScrollReveal animation="fadeInUp" delay={0}>
-            <div className="text-center mb-16">
-              <h2 className="text-5xl font-bold mb-4" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                About Me
-              </h2>
-              <p className="text-xl text-gray-300">Passionate about creating intelligent solutions</p>
-            </div>
-          </ScrollReveal>
+          <SectionHeader title="About Me" subtitle="Passionate about creating intelligent solutions" />
 
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <ScrollReveal animation="fadeInLeft" delay={200} duration={800}>
-              <div className="space-y-8">
-                <p className="text-xl text-gray-300 leading-relaxed">
-                  I'm a dedicated Full Stack AI Engineer with a passion for developing innovative solutions
-                  using cutting-edge technologies. My expertise spans across machine learning, natural language
-                  processing, and full-stack web development.
-                </p>
+            <motion.div
+              className="space-y-8"
+              variants={fadeInLeft}
+              initial="hidden"
+              whileInView="visible"
+              viewport={viewportOnce}
+            >
+              <p className="text-xl text-gray-300 leading-relaxed">
+                I'm a dedicated Full Stack AI Engineer with a passion for developing innovative solutions
+                using cutting-edge technologies. My expertise spans across machine learning, natural language
+                processing, and full-stack web development.
+              </p>
 
-                <div className="grid grid-cols-2 gap-6">
-                  {[
-                    { number: "AI", label: "Specialist" },
-                    { number: "9+", label: "Projects Built" },
-                    { number: "1+", label: "Years Experience" },
-                    { number: "100%", label: "Dedication" }
-                  ].map((stat, index) => (
-                    <ScrollReveal 
-                      key={index} 
-                      animation="scaleIn" 
-                      delay={400 + (index * 100)}
-                      duration={600}
-                    >
-                      <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 text-center hover:bg-white/10 transition-colors">
-                        <div className="text-3xl font-bold text-blue-400 mb-2">{stat.number}</div>
-                        <div className="text-gray-300 font-medium">{stat.label}</div>
-                      </div>
-                    </ScrollReveal>
-                  ))}
-                </div>
-              </div>
-            </ScrollReveal>
+              <motion.div
+                className="grid grid-cols-2 gap-6"
+                variants={staggerContainer}
+                initial="hidden"
+                whileInView="visible"
+                viewport={viewportOnce}
+              >
+                {[
+                  { number: 'AI', label: 'Specialist' },
+                  { number: '9+', label: 'Projects Built' },
+                  { number: '1+', label: 'Years Experience' },
+                  { number: '100%', label: 'Dedication' },
+                ].map((stat, index) => (
+                  <motion.div
+                    key={index}
+                    variants={scaleIn}
+                    custom={index * 0.1}
+                    className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 text-center hover:bg-white/8 hover:border-electric-500/20 transition-colors duration-300"
+                  >
+                    <div className="text-3xl font-display font-bold text-electric-500 mb-2">{stat.number}</div>
+                    <div className="text-gray-400 font-medium text-sm">{stat.label}</div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </motion.div>
 
-            <ScrollReveal animation="fadeInRight" delay={300} duration={800}>
-              <div className="flex justify-center">
-                <div className="w-80 h-80 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center border border-white/20 backdrop-blur-md">
-                  <div className="w-64 h-64 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+            <motion.div
+              className="flex justify-center"
+              variants={fadeInRight}
+              initial="hidden"
+              whileInView="visible"
+              viewport={viewportOnce}
+            >
+              <div className="relative">
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-electric-500/20 to-violet-600/20 blur-3xl scale-110" />
+                <div
+                  className="relative w-72 h-72 rounded-full p-[2px]"
+                  style={{
+                    background: 'linear-gradient(135deg, #00D9FF 0%, #7C3AED 100%)',
+                  }}
+                >
+                  <div className="w-full h-full rounded-full overflow-hidden bg-base-900">
                     <img
                       src="/image.jpg"
                       alt="Muhammad Junaid Sarfraz"
-                      className="w-64 h-64 rounded-full object-cover"
+                      className="w-full h-full object-cover"
                     />
                   </div>
                 </div>
               </div>
-            </ScrollReveal>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Education Section */}
-      <section id="education" className="py-20">
+      {/* Education */}
+      <section id="education" className="py-24" style={{ backgroundColor: '#080C14' }}>
         <div className="max-w-7xl mx-auto px-6">
-          <ScrollReveal animation="fadeInUp" delay={0}>
-            <div className="text-center mb-16">
-              <h2 className="text-5xl font-bold mb-4" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Education
-              </h2>
-              <p className="text-xl text-gray-300">My academic journey</p>
-            </div>
-          </ScrollReveal>
+          <SectionHeader title="Education" subtitle="My academic journey" />
 
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-2xl mx-auto">
             {education.map((edu, index) => (
-              <ScrollReveal 
-                key={index} 
-                animation="fadeInUp" 
-                delay={index * 100}
-                duration={800}
-              >
-                <EducationCard {...edu} />
-              </ScrollReveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Experience Section */}
-      <section id="experience" className="py-20" style={{ backgroundColor: '#1e293b' }}>
-        <div className="max-w-7xl mx-auto px-6">
-          <ScrollReveal animation="fadeInUp" delay={0}>
-            <div className="text-center mb-16">
-              <h2 className="text-5xl font-bold mb-4" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Professional Experience
-              </h2>
-              <p className="text-xl text-gray-300">My career journey in AI engineering</p>
-            </div>
-          </ScrollReveal>
-
-          <div className="max-w-4xl mx-auto space-y-6">
-            {experience.map((exp, index) => (
-              <ScrollReveal 
-                key={index} 
-                animation="fadeInUp" 
-                delay={index * 100}
-                duration={800}
-              >
-                <ExperienceCard {...exp} />
-              </ScrollReveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Projects Section */}
-      <section id="projects" className="py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <ScrollReveal animation="fadeInUp" delay={0}>
-            <div className="text-center mb-16">
-              <h2 className="text-5xl font-bold mb-4" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Featured Projects
-              </h2>
-              <p className="text-xl text-gray-300">Latest projects · AI solutions built at scale</p>
-            </div>
-          </ScrollReveal>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {projects.map((project, index) => (
-              <ScrollReveal
+              <motion.div
                 key={index}
-                animation="fadeInUp"
-                delay={index * 100}
-                duration={800}
+                variants={fadeInUp}
+                initial="hidden"
+                whileInView="visible"
+                viewport={viewportOnce}
+                custom={index * 0.1}
+                className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 hover:border-electric-500/20 transition-colors duration-300 border-l-2 border-l-electric-500/40"
               >
-                <ProjectCard {...project} />
-              </ScrollReveal>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <GraduationCap className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-display text-xl font-bold text-white">{edu.degree}</h3>
+                    <p className="text-electric-500 font-medium">{edu.university}</p>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-4 h-4 text-gray-500" />
+                    <span className="text-gray-300 text-sm">{edu.duration}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Award className="w-4 h-4 text-gray-500" />
+                    <span className="text-gray-300 text-sm">
+                      CGPA: <span className="text-electric-500 font-semibold">{edu.cgpa}</span>
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
             ))}
           </div>
-
-          <ScrollReveal animation="fadeInUp" delay={200}>
-            <div className="flex flex-col items-center gap-3 mt-14">
-              <p className="text-gray-500 text-sm">Showing 6 of 9 projects</p>
-              <button
-                onClick={() => navigate('/projects')}
-                className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl font-semibold hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-blue-500/25 text-white"
-              >
-                View All Projects
-                <ExternalLink className="w-5 h-5" />
-              </button>
-            </div>
-          </ScrollReveal>
         </div>
       </section>
 
-      {/* Skills Section */}
-      <section id="skills" className="py-20" style={{ backgroundColor: '#1e293b' }}>
+      {/* Experience */}
+      <section id="experience" className="py-24" style={{ backgroundColor: '#0D1117' }}>
         <div className="max-w-7xl mx-auto px-6">
-          <ScrollReveal animation="fadeInUp" delay={0}>
-            <div className="text-center mb-16">
-              <h2 className="text-5xl font-bold mb-4" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Skills & Technologies
-              </h2>
-              <p className="text-xl text-gray-300">Technologies I work with</p>
-            </div>
-          </ScrollReveal>
+          <SectionHeader title="Professional Experience" subtitle="My career journey in AI engineering" />
+          <ExperienceTimeline experience={experience} />
+        </div>
+      </section>
+
+      {/* Projects */}
+      <section id="projects" className="py-24" style={{ backgroundColor: '#080C14' }}>
+        <div className="max-w-7xl mx-auto px-6">
+          <SectionHeader title="Featured Projects" subtitle="Latest projects · AI solutions built at scale" />
+
+          <motion.div
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+          >
+            {projects.map((project, index) => (
+              <motion.div key={index} variants={fadeInUp} custom={index * 0.08}>
+                <ProjectCard project={project} onOpen={setSelectedProject} />
+              </motion.div>
+            ))}
+          </motion.div>
+
+          <motion.div
+            className="flex flex-col items-center gap-3 mt-14"
+            variants={fadeInUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+          >
+            <p className="text-gray-500 text-sm">Showing 6 of 9 projects</p>
+            <motion.button
+              onClick={() => navigate('/projects')}
+              className="inline-flex items-center gap-3 px-8 py-4 bg-electric-500 text-base-900 rounded-2xl font-display font-semibold glow-electric hover:bg-electric-400 transition-colors shadow-2xl"
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              View All Projects
+              <ExternalLink className="w-5 h-5" />
+            </motion.button>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Skills */}
+      <section id="skills" className="py-24" style={{ backgroundColor: '#0D1117' }}>
+        <div className="max-w-7xl mx-auto px-6">
+          <SectionHeader title="Skills & Technologies" subtitle="Technologies I work with" />
 
           <div className="grid lg:grid-cols-2 gap-8">
             {skillCategories.map((category, index) => (
-              <ScrollReveal 
-                key={index} 
-                animation={index % 2 === 0 ? "fadeInLeft" : "fadeInRight"} 
-                delay={index * 150}
-                duration={800}
+              <motion.div
+                key={index}
+                variants={index % 2 === 0 ? fadeInLeft : fadeInRight}
+                initial="hidden"
+                whileInView="visible"
+                viewport={viewportOnce}
+                custom={index * 0.1}
+                className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 hover:border-electric-500/20 transition-colors duration-300 group"
               >
-                <SkillCategory {...category} />
-              </ScrollReveal>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-br from-electric-500/20 to-violet-600/20 border border-electric-500/20 rounded-xl flex items-center justify-center group-hover:border-electric-500/40 transition-colors duration-300">
+                    <category.icon className="w-6 h-6 text-electric-500" />
+                  </div>
+                  <h3 className="font-display text-xl font-bold text-white">{category.title}</h3>
+                </div>
+                <motion.div
+                  className="grid grid-cols-2 gap-3"
+                  variants={staggerContainer}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={viewportOnce}
+                >
+                  {category.skills.map((skill) => (
+                    <motion.div
+                      key={skill}
+                      variants={scaleIn}
+                      whileHover={{ scale: 1.05, backgroundColor: 'rgba(0,217,255,0.1)' }}
+                      className="bg-white/5 border border-white/10 rounded-xl p-3 text-center cursor-default"
+                    >
+                      <span className="text-gray-300 font-medium text-sm">{skill}</span>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Contact Section */}
-      <section id="contact" className="py-20">
+      {/* Contact */}
+      <section id="contact" className="py-24" style={{ backgroundColor: '#080C14' }}>
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold mb-4" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              Let's Connect
-            </h2>
-            <p className="text-xl text-gray-300">Ready to discuss your next project</p>
-          </div>
+          <SectionHeader title="Let's Connect" subtitle="Ready to discuss your next project" />
 
           <div className="grid lg:grid-cols-2 gap-12">
-            <div className="space-y-8">
+            <motion.div
+              className="space-y-8"
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="visible"
+              viewport={viewportOnce}
+            >
               {[
-                { icon: Mail, title: "Email", value: "mjunaid2282001@gmail.com" },
-                // { icon: Phone, title: "Phone", value: "+92 *** ********" },
-                { icon: Clock, title: "Availability", value: "Mon - Fri, 9AM - 6PM, UTC +05:00" },
-                { icon: MapPin, title: "Location", value: "Pakistan" }
+                { icon: Mail, title: 'Email', value: 'mjunaid2282001@gmail.com' },
+                { icon: Clock, title: 'Availability', value: 'Mon - Fri, 9AM - 6PM, UTC +05:00' },
+                { icon: MapPin, title: 'Location', value: 'Pakistan' },
               ].map((contact, index) => (
-                <div key={index} className="flex items-center gap-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center">
-                    <contact.icon className="w-8 h-8 text-white" />
+                <motion.div
+                  key={index}
+                  variants={fadeInLeft}
+                  custom={index * 0.1}
+                  className="flex items-center gap-6"
+                >
+                  <div className="w-14 h-14 bg-gradient-to-br from-electric-500/20 to-violet-600/20 border border-electric-500/20 rounded-2xl flex items-center justify-center flex-shrink-0">
+                    <contact.icon className="w-6 h-6 text-electric-500" />
                   </div>
                   <div>
-                    <h4 className="text-xl font-semibold text-white mb-1">{contact.title}</h4>
-                    <p className="text-gray-300">{contact.value}</p>
+                    <h4 className="font-display text-lg font-semibold text-white mb-1">{contact.title}</h4>
+                    <p className="text-gray-400">{contact.value}</p>
                   </div>
-                </div>
+                </motion.div>
               ))}
 
-              <div className="flex gap-4 pt-4">
-                <a href="https://github.com/mjunaidsays" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center hover:bg-white/20 transition-colors">
-                  <Github className="w-6 h-6" />
-                </a>
-                <a href="https://www.linkedin.com/in/m-junaid2282001" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center hover:bg-white/20 transition-colors">
-                  <Linkedin className="w-6 h-6" />
-                </a>
-                <a href="mailto:mjunaid2282001@gmail.com" className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center hover:bg-white/20 transition-colors">
-                  <Mail className="w-6 h-6" />
-                </a>
-              </div>
-            </div>
+              <motion.div variants={fadeInLeft} custom={0.3} className="flex gap-4 pt-2">
+                {[
+                  { href: 'https://github.com/mjunaidsays', Icon: Github, label: 'GitHub' },
+                  { href: 'https://www.linkedin.com/in/m-junaid2282001', Icon: Linkedin, label: 'LinkedIn' },
+                  { href: 'mailto:mjunaid2282001@gmail.com', Icon: Mail, label: 'Email' },
+                ].map(({ href, Icon, label }) => (
+                  <motion.a
+                    key={label}
+                    href={href}
+                    target={href.startsWith('http') ? '_blank' : undefined}
+                    rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                    className="w-12 h-12 bg-white/8 border border-white/10 rounded-xl flex items-center justify-center text-gray-400 hover:text-electric-500 hover:border-electric-500/30 hover:bg-electric-500/10 transition-all duration-200"
+                    whileHover={{ y: -2, scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Icon className="w-5 h-5" />
+                  </motion.a>
+                ))}
+              </motion.div>
+            </motion.div>
 
-            <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 hover:border-blue-400/30 transition-all duration-300">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
+            <motion.div
+              variants={fadeInRight}
+              initial="hidden"
+              whileInView="visible"
+              viewport={viewportOnce}
+              className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 hover:border-electric-500/20 transition-colors duration-300"
+            >
+              <form onSubmit={handleSubmit} className="space-y-5">
+                {[
+                  { name: 'name', type: 'text', placeholder: 'Your Name' },
+                  { name: 'email', type: 'email', placeholder: 'Your Email' },
+                  { name: 'subject', type: 'text', placeholder: 'Subject' },
+                ].map((field) => (
                   <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
+                    key={field.name}
+                    type={field.type}
+                    name={field.name}
+                    value={formData[field.name as keyof typeof formData]}
                     onChange={handleInputChange}
-                    placeholder="Your Name"
+                    placeholder={field.placeholder}
                     required
-                    className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 focus:bg-white/10 transition-all duration-300"
+                    className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:border-electric-500/40 focus:bg-white/8 transition-all duration-300"
                   />
-                </div>
-                <div>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="Your Email"
-                    required
-                    className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 focus:bg-white/10 transition-all duration-300"
-                  />
-                </div>
-                <div>
-                  <input
-                    type="text"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleInputChange}
-                    placeholder="Subject"
-                    required
-                    className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 focus:bg-white/10 transition-all duration-300"
-                  />
-                </div>
-                <div>
-                  <textarea
-                    name="message"
-                    value={formData.message}
-                    onChange={handleInputChange}
-                    rows={5}
-                    placeholder="Your Message"
-                    required
-                    className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 focus:bg-white/10 transition-all duration-300 resize-none"
-                  />
-                </div>
-                <button
+                ))}
+                <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  rows={5}
+                  placeholder="Your Message"
+                  required
+                  className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:border-electric-500/40 focus:bg-white/8 transition-all duration-300 resize-none"
+                />
+                <motion.button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`w-full px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-2xl ${
-                    isSubmitting 
-                      ? 'bg-gray-500 cursor-not-allowed' 
-                      : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 hover:shadow-blue-500/25'
+                  className={`w-full px-8 py-4 rounded-2xl font-display font-semibold transition-colors shadow-2xl ${
+                    isSubmitting
+                      ? 'bg-gray-600 cursor-not-allowed text-gray-400'
+                      : 'bg-electric-500 text-base-900 hover:bg-electric-400 glow-electric'
                   }`}
+                  whileHover={isSubmitting ? {} : { scale: 1.02 }}
+                  whileTap={isSubmitting ? {} : { scale: 0.98 }}
                 >
                   {isSubmitting ? 'Sending...' : 'Send Message'}
-                </button>
-                
-                {submitStatus === 'success' && (
-                  <div className="text-center text-green-400 text-sm p-3 bg-green-400/10 rounded-lg border border-green-400/20">
-                    Message sent successfully! I'll get back to you soon.
-                  </div>
-                )}
-                
-                {submitStatus === 'error' && (
-                  <div className="text-center text-red-400 text-sm p-3 bg-red-400/10 rounded-lg border border-red-400/20">
-                    ❌ Please fill all fields and try again.
-                  </div>
-                )}
+                </motion.button>
+
+                <AnimatePresence mode="wait">
+                  {submitStatus === 'success' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="text-center text-green-400 text-sm p-3 bg-green-400/10 rounded-xl border border-green-400/20"
+                    >
+                      Message sent successfully! I'll get back to you soon.
+                    </motion.div>
+                  )}
+                  {submitStatus === 'error' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="text-center text-red-400 text-sm p-3 bg-red-400/10 rounded-xl border border-red-400/20"
+                    >
+                      Please fill all fields and try again.
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </form>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-16 border-t" style={{ backgroundColor: '#1e293b', borderTop: '1px solid #334155' }}>
+      <footer className="py-16 border-t border-white/8" style={{ backgroundColor: '#0D1117' }}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-8 mb-12">
-            {/* Brand & Description */}
             <div className="lg:col-span-1">
               <div className="mb-6">
-                <div className="text-3xl font-bold mb-4" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                  MJ
-                </div>
-                <p className="text-gray-300 leading-relaxed mb-6">
+                <div className="font-display text-3xl font-bold gradient-text-electric mb-4">MJ</div>
+                <p className="text-gray-400 leading-relaxed mb-6 text-sm">
                   Full Stack AI Engineer passionate about creating intelligent solutions that solve real-world problems.
                 </p>
-                <div className="flex gap-4">
-                  <a href="https://github.com/mjunaidsays" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors">
-                    <Github className="w-5 h-5" />
-                  </a>
-                  <a href="https://www.linkedin.com/in/m-junaid2282001" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors">
-                    <Linkedin className="w-5 h-5" />
-                  </a>
-                  <a href="mailto:mjunaid2282001@gmail.com" className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors">
-                    <Mail className="w-5 h-5" />
-                  </a>
-                  {/* <a href="#" className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors">
-                    <Twitter className="w-5 h-5" />
-                  </a> */}
+                <div className="flex gap-3">
+                  {[
+                    { href: 'https://github.com/mjunaidsays', Icon: Github },
+                    { href: 'https://www.linkedin.com/in/m-junaid2282001', Icon: Linkedin },
+                    { href: 'mailto:mjunaid2282001@gmail.com', Icon: Mail },
+                  ].map(({ href, Icon }) => (
+                    <motion.a
+                      key={href}
+                      href={href}
+                      target={href.startsWith('http') ? '_blank' : undefined}
+                      rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                      className="w-10 h-10 bg-white/8 border border-white/10 rounded-lg flex items-center justify-center text-gray-400 hover:text-electric-500 hover:bg-electric-500/10 hover:border-electric-500/30 transition-all duration-200"
+                      whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </motion.a>
+                  ))}
                 </div>
               </div>
             </div>
 
-            {/* Quick Links */}
             <div>
-              <h3 className="text-xl font-bold text-white mb-6">Quick Links</h3>
-              <div className="space-y-4">
+              <h3 className="font-display text-lg font-bold text-white mb-5">Quick Links</h3>
+              <div className="space-y-3">
                 {[
                   { name: 'Home', section: 'home' },
                   { name: 'About', section: 'about' },
@@ -1026,96 +650,103 @@ function App() {
                   { name: 'Experience', section: 'experience' },
                   { name: 'Projects', section: 'projects' },
                   { name: 'Skills', section: 'skills' },
-                  { name: 'Contact', section: 'contact' }
-                ].map((link, index) => (
+                  { name: 'Contact', section: 'contact' },
+                ].map((link) => (
                   <button
-                    key={index}
+                    key={link.section}
                     onClick={() => scrollToSection(link.section)}
-                    className="block text-gray-300 hover:text-blue-400 transition-colors text-left"
+                    className="block text-gray-400 hover:text-electric-500 transition-colors text-sm text-left"
                   >
                     {link.name}
                   </button>
                 ))}
                 <button
                   onClick={() => navigate('/projects')}
-                  className="block text-blue-400 hover:text-blue-300 transition-colors text-left font-medium"
+                  className="block text-electric-500 hover:text-electric-400 transition-colors text-sm text-left font-medium"
                 >
                   All Projects →
                 </button>
               </div>
             </div>
 
-            {/* Contact Info */}
             <div>
-              <h3 className="text-xl font-bold text-white mb-6">Contact Info</h3>
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <Mail className="w-5 h-5 text-blue-400" />
-                  <span className="text-gray-300">mjunaid2282001@gmail.com</span>
-                </div>
-                {/* <div className="flex items-center gap-3">
-                  <Phone className="w-5 h-5 text-blue-400" />
-                  <span className="text-gray-300">+92 *** *******</span>
-                </div> */}
-                <div className="flex items-center gap-3">
-                  <Clock className="w-5 h-5 text-blue-400" />
-                  <span className="text-gray-300">Mon-Fri, 9AM-6PM, UTC +05:00</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <MapPin className="w-5 h-5 text-blue-400" />
-                  <span className="text-gray-300">Pakistan</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <GraduationCap className="w-5 h-5 text-blue-400" />
-                  <span className="text-gray-300">NCBA&E University</span>
-                </div>
+              <h3 className="font-display text-lg font-bold text-white mb-5">Contact Info</h3>
+              <div className="space-y-3">
+                {[
+                  { Icon: Mail, text: 'mjunaid2282001@gmail.com' },
+                  { Icon: Clock, text: 'Mon-Fri, 9AM-6PM, UTC +05:00' },
+                  { Icon: MapPin, text: 'Pakistan' },
+                  { Icon: GraduationCap, text: 'NCBA&E University' },
+                ].map(({ Icon, text }) => (
+                  <div key={text} className="flex items-center gap-3">
+                    <Icon className="w-4 h-4 text-electric-500 flex-shrink-0" />
+                    <span className="text-gray-400 text-sm">{text}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Newsletter */}
             <div>
-              <h3 className="text-xl font-bold text-white mb-6">Stay Updated</h3>
-              <p className="text-gray-300 mb-4">Subscribe to get updates on my latest projects and insights.</p>
+              <h3 className="font-display text-lg font-bold text-white mb-5">Stay Updated</h3>
+              <p className="text-gray-400 text-sm mb-4">Subscribe to get updates on my latest projects and insights.</p>
               <form onSubmit={handleNewsletterSubmit} className="space-y-3">
                 <input
                   type="email"
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
                   placeholder="Your email address"
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 focus:bg-white/10 transition-all duration-300"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-electric-500/40 transition-all duration-300 text-sm"
                 />
-                <button
+                <motion.button
                   type="submit"
-                  className="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg font-semibold hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-blue-500/25"
+                  className="w-full px-4 py-3 bg-electric-500 text-base-900 rounded-xl font-display font-semibold hover:bg-electric-400 transition-colors text-sm"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
                 >
                   Subscribe
-                </button>
-                {newsletterStatus === 'success' && (
-                  <div className="text-green-400 text-sm">
-                    ✅ Successfully subscribed!
-                  </div>
-                )}
-                {newsletterStatus === 'error' && (
-                  <div className="text-red-400 text-sm">
-                    ❌ Please enter a valid email.
-                  </div>
-                )}
+                </motion.button>
+                <AnimatePresence mode="wait">
+                  {newsletterStatus === 'success' && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="text-green-400 text-xs"
+                    >
+                      Successfully subscribed!
+                    </motion.div>
+                  )}
+                  {newsletterStatus === 'error' && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="text-red-400 text-xs"
+                    >
+                      Please enter a valid email.
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </form>
             </div>
           </div>
 
-          {/* Bottom Bar */}
-          <div className="border-t border-white/10 pt-8">
+          <div className="border-t border-white/8 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <div className="flex items-center gap-2 text-gray-400">
+              <div className="flex items-center gap-2 text-gray-500 text-sm">
                 <span>© 2026 Muhammad Junaid Sarfraz. Made with</span>
-                <Heart className="w-4 h-4 text-red-500" />
+                <motion.span
+                  animate={{ scale: [1, 1.3, 1] }}
+                  transition={{ duration: 1, repeat: Infinity, repeatDelay: 1 }}
+                >
+                  <Heart className="w-4 h-4 text-red-500" />
+                </motion.span>
                 <span>All rights reserved.</span>
               </div>
               <div className="flex gap-6 text-sm">
-                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">Privacy Policy</a>
-                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">Terms of Service</a>
-                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">Cookie Policy</a>
+                <a href="#" className="text-gray-500 hover:text-electric-500 transition-colors">Privacy Policy</a>
+                <a href="#" className="text-gray-500 hover:text-electric-500 transition-colors">Terms of Service</a>
+                <a href="#" className="text-gray-500 hover:text-electric-500 transition-colors">Cookie Policy</a>
               </div>
             </div>
           </div>
